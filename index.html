@@ -2,11 +2,140 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>ETAPE-1</title>
+  <title>FIND ME ?</title>
+  <style>
+    body {
+      background-color: black;
+      color: limegreen;
+      font-family: monospace;
+      text-align: center;
+      margin-top: 20%;
+    }
+    h1 {
+      font-size: 3em;
+    }
+    #pixel {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background-color: red;
+      top: 100px;
+      left: 100px;
+      cursor: pointer;
+    }
+    /* Admin panel */
+    #adminPanel {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      color: limegreen;
+      border: 1px solid limegreen;
+      padding: 20px;
+      z-index: 1000;
+      width: 250px;
+    }
+    #adminPanel input {
+      width: 100%;
+      margin: 5px 0;
+      background: black;
+      color: limegreen;
+      border: 1px solid limegreen;
+      padding: 5px;
+    }
+    #closePanel {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
+      color: red;
+    }
+    #saveBtn {
+      background: limegreen;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      padding: 5px;
+      margin-top: 10px;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <h1>Bonjour à tous 👋</h1>
-  <p>Bienvenue dans les énigmes du nouveau Monde !</p>
+  <h1>FIND ME ?</h1>
+  <div id="pixel"></div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel">
+    <span id="closePanel">X</span>
+    <h3>Admin Panel</h3>
+    <label>Couleur du pixel:</label>
+    <input type="text" id="pixelColor" placeholder="ex: red ou #ff0000">
+    <label>Position X:</label>
+    <input type="number" id="pixelX" placeholder="ex: 100">
+    <label>Position Y:</label>
+    <input type="number" id="pixelY" placeholder="ex: 100">
+    <label>Password:</label>
+    <input type="text" id="pixelPass" placeholder="mot de passe">
+    <label>URL de redirection:</label>
+    <input type="text" id="pixelURL" placeholder="https://...">
+    <button id="saveBtn">Sauvegarder</button>
+  </div>
+
+  <script>
+    const pixel = document.getElementById("pixel");
+    const adminPanel = document.getElementById("adminPanel");
+    const closePanel = document.getElementById("closePanel");
+    const saveBtn = document.getElementById("saveBtn");
+
+    // Valeurs par défaut
+    let pixelPass = "1234";
+    let pixelURL = "https://example.com";
+
+    // Ouvrir admin panel avec combinaison de touches
+    let keyBuffer = "";
+    document.addEventListener("keydown", (e) => {
+      keyBuffer += e.key;
+      if (keyBuffer.includes("963tre753")) {
+        adminPanel.style.display = "block";
+        keyBuffer = "";
+      }
+      if (keyBuffer.length > 20) keyBuffer = ""; // reset si trop long
+    });
+
+    // Fermer le panel
+    closePanel.addEventListener("click", () => {
+      adminPanel.style.display = "none";
+    });
+
+    // Sauvegarder les réglages
+    saveBtn.addEventListener("click", () => {
+      let color = document.getElementById("pixelColor").value;
+      let posX = document.getElementById("pixelX").value;
+      let posY = document.getElementById("pixelY").value;
+      pixelPass = document.getElementById("pixelPass").value || pixelPass;
+      pixelURL = document.getElementById("pixelURL").value || pixelURL;
+
+      if (color) pixel.style.backgroundColor = color;
+      if (posX) pixel.style.left = posX + "px";
+      if (posY) pixel.style.top = posY + "px";
+
+      alert("Paramètres sauvegardés !");
+      adminPanel.style.display = "none";
+    });
+
+    // Clique sur le pixel → demande mot de passe
+    pixel.addEventListener("click", () => {
+      let input = prompt("Code :");
+      if (input === pixelPass) {
+        window.location.href = pixelURL;
+      } else {
+        alert("NON ! NON ! c'est faux");
+      }
+    });
+  </script>
 </body>
 </html>
-
