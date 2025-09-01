@@ -9,10 +9,16 @@
       color: limegreen;
       font-family: monospace;
       text-align: center;
-      margin-top: 20%;
+      margin-top: 15%;
+      user-select: none;
     }
     h1 {
       font-size: 3em;
+      animation: pulse 2s infinite alternate;
+    }
+    @keyframes pulse {
+      0%   { opacity: 0.4; text-shadow: 0 0 2px limegreen; }
+      100% { opacity: 1; text-shadow: 0 0 15px limegreen; }
     }
     #pixel {
       position: absolute;
@@ -22,6 +28,12 @@
       top: 100px;
       left: 100px;
       cursor: pointer;
+    }
+    /* Compteur visiteurs */
+    #counter {
+      margin-top: 40px;
+      font-size: 1.2em;
+      color: limegreen;
     }
     /* Admin panel */
     #adminPanel {
@@ -67,6 +79,7 @@
 <body>
   <h1>FIND ME ?</h1>
   <div id="pixel"></div>
+  <div id="counter">Visiteurs : ...</div>
 
   <!-- Admin Panel -->
   <div id="adminPanel">
@@ -85,7 +98,39 @@
     <button id="saveBtn">Sauvegarder</button>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
+    // 🔥 Configuration Firebase (⚠️ à remplacer par tes propres clés)
+    const firebaseConfig = {
+      apiKey: "TON_API_KEY",
+      authDomain: "TON_PROJET.firebaseapp.com",
+      databaseURL: "https://TON_PROJET.firebaseio.com",
+      projectId: "TON_PROJET",
+      storageBucket: "TON_PROJET.appspot.com",
+      messagingSenderId: "XXXXXXX",
+      appId: "TON_APP_ID"
+    };
+
+    // Initialiser Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Compteur visiteurs
+    const counterEl = document.getElementById("counter");
+    const counterRef = db.ref("visiteurs");
+
+    counterRef.transaction((currentValue) => {
+      return (currentValue || 0) + 1;
+    });
+
+    counterRef.on("value", (snapshot) => {
+      counterEl.textContent = "Visiteurs : " + snapshot.val();
+    });
+
+    // --- Pixel & Admin ---
     const pixel = document.getElementById("pixel");
     const adminPanel = document.getElementById("adminPanel");
     const closePanel = document.getElementById("closePanel");
@@ -95,6 +140,15 @@
     let pixelPass = "1234";
     let pixelURL = "https://example.com";
 
+    // Charger paramètres sauvegardés
+    window.onload = () => {
+      if (localStorage.getItem("pixelColor")) pixel.style.backgroundColor = localStorage.getItem("pixelColor");
+      if (localStorage.getItem("pixelX")) pixel.style.left = localStorage.getItem("pixelX") + "px";
+      if (localStorage.getItem("pixelY")) pixel.style.top = localStorage.getItem("pixelY") + "px";
+      if (localStorage.getItem("pixelPass")) pixelPass = localStorage.getItem("pixelPass");
+      if (localStorage.getItem("pixelURL")) pixelURL = localStorage.getItem("pixelURL");
+    };
+
     // Ouvrir admin panel avec combinaison de touches
     let keyBuffer = "";
     document.addEventListener("keydown", (e) => {
@@ -103,7 +157,7 @@
         adminPanel.style.display = "block";
         keyBuffer = "";
       }
-      if (keyBuffer.length > 20) keyBuffer = ""; // reset si trop long
+      if (keyBuffer.length > 20) keyBuffer = "";
     });
 
     // Fermer le panel
@@ -119,9 +173,20 @@
       pixelPass = document.getElementById("pixelPass").value || pixelPass;
       pixelURL = document.getElementById("pixelURL").value || pixelURL;
 
-      if (color) pixel.style.backgroundColor = color;
-      if (posX) pixel.style.left = posX + "px";
-      if (posY) pixel.style.top = posY + "px";
+      if (color) {
+        pixel.style.backgroundColor = color;
+        localStorage.setItem("pixelColor", color);
+      }
+      if (posX) {
+        pixel.style.left = posX + "px";
+        localStorage.setItem("pixelX", posX);
+      }
+      if (posY) {
+        pixel.style.top = posY + "px";
+        localStorage.setItem("pixelY", posY);
+      }
+      localStorage.setItem("pixelPass", pixelPass);
+      localStorage.setItem("pixelURL", pixelURL);
 
       alert("Paramètres sauvegardés !");
       adminPanel.style.display = "none";
@@ -134,6 +199,22 @@
         window.location.href = pixelURL;
       } else {
         alert("NON ! NON ! c'est faux");
+      }
+    });
+
+    // 🔒 Bloquer clic droit
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // 🔒 Bloquer touches inspecter
+    document.addEventListener("keydown", (e) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && e.key === "I") ||
+        (e.ctrlKey && e.shiftKey && e.key === "J") ||
+        (e.ctrlKey && e.key === "U")
+      ) {
+        e.preventDefault();
+        alert("Action bloquée !");
       }
     });
   </script>
